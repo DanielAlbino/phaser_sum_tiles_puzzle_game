@@ -6,7 +6,10 @@ var gameOptions = {
     rows: 4,
     cols: 4,
   },
-  tweenSpeed: 1000,
+  tweenSpeed: 200,
+  swipeMaxTime: 1000,
+  swipeMinDistance: 20,
+  swipeMinNormal: 0.85,
 };
 const LEFT = 0;
 const RIGHT = 1;
@@ -99,16 +102,52 @@ class playGame extends Phaser.Scene {
     }
   }
 
-  makeMove(direction) {
-    console.log("About to Move " + direction);
-  }
-
   handleSwipe(e) {
     var swipeTime = e.upTime - e.downTime;
+    var fastEnough = swipeTime < gameOptions.swipeMaxTime;
     var swipe = new Phaser.Geom.Point(e.upX - e.downX - e.downY);
-    console.log("Movement Time:" + swipeTime + "ms");
-    console.log("Horiontal distance:" + swipe.x + "pixels");
-    console.log("Vertical distance:" + swipe.y + "pixels");
+    var swipeMagnitude = Phaser.Geom.Point.GetMagnitude(swipe);
+    var longEnough = swipeMagnitude > gameOptions.swipeMinDistance;
+
+    if (longEnough && fastEnough) {
+      Phaser.Geom.Point.SetMagnitude(swipe, 1);
+      if (swipe.x > gameOptions.swipeMinNormal) {
+        this.makeMove(RIGHT);
+      }
+      if (swipe.x < -gameOptions.swipeMinNormal) {
+        this.makeMove(LEFT);
+      }
+      if (swipe.y > gameOptions.swipeMinNormal) {
+        this.makeMove(DOWN);
+      }
+      if (swipe.y < -gameOptions.swipeMinNormal) {
+        this.makeMove(UP);
+      }
+    }
+  }
+
+  makeMove(direction) {
+    var dRow =
+      direction == LEFT || direction == RIGHT ? 0 : direction == UP ? -1 : 1;
+    var dCol =
+      direction == UP || direction == DOWN ? 0 : direction == LEFT ? -1 : 1;
+    this.canMove = false;
+    var movedTiles = 0;
+
+    for (var i = 0; i < gameOptions.boardSize.rows; i++) {
+      for (var j = 0; j < gameOptions.boardSize.cols; j++) {
+        var curRow = dRow == 1 ? gameOptions.boardSize.rows - 1 - i : i;
+        var curCol = dCol == 1 ? gameOptions.boardSize.cols - 1 - j : j;
+        var tileValue = this.boardArray[curRow][curCol].tileValue;
+        if (tileValue != 0) {
+          movedTiles++;
+          this.boardArray[curRow][curCol].tileSprite.depth = movedTiles;
+          var newPos = this.getTilePosition(curRow + dRow, curCol + dCol);
+          this.boardArray[curRow][curCol].tileSprite.x = newPos.x;
+          this.boardArray[curRow][curCol].tileSprite.y = newPos.y;
+        }
+      }
+    }
   }
 
   getTilePosition(row, col) {
