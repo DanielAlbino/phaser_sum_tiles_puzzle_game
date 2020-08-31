@@ -32,6 +32,10 @@ class bootGame extends Phaser.Scene {
   }
   preload() {
     this.load.image("emptytile", "Assets/emptyTile.png");
+    this.load.spritesheet("tiles", "Assets/tiles_sprite.png", {
+      frameWidth: gameOptions.tileSize,
+      frameHeight: gameOptions.tileSize,
+    });
   }
   create() {
     this.scene.start("PlayGame");
@@ -48,6 +52,7 @@ class playGame extends Phaser.Scene {
       for (var j = 0; j < 4; j++) {
         var tilePosition = this.getTilePosition(i, j);
         this.add.image(tilePosition.x, tilePosition.y, "emptytile");
+        this.add.sprite(tilePosition.x, tilePosition.y, "tiles", 0);
       }
     }
   }
