@@ -11,6 +11,7 @@ var gameOptions = {
   swipeMinDistance: 20,
   swipeMinNormal: 0.85,
   aspectRatio: 16 / 9,
+  localStorageName: "topscore4096",
 };
 const LEFT = 0;
 const RIGHT = 1;
@@ -56,6 +57,11 @@ class bootGame extends Phaser.Scene {
     this.load.image("scorelabels", "Assets/score_labels.png");
     this.load.image("logo", "Assets/logo.png");
     this.load.image("howtoplay", "Assets/howtoplay.png");
+    this.load.bitmapFont(
+      "font",
+      "Assets/fonts/font.png",
+      "Assets/fonts/font.fnt"
+    );
   } //preload
   create() {
     this.scene.start("PlayGame");
@@ -69,6 +75,7 @@ class playGame extends Phaser.Scene {
   create() {
     this.canMove = false;
     this.boardArray = [];
+    this.score = 0;
     for (var i = 0; i < gameOptions.boardSize.rows; i++) {
       this.boardArray[i] = [];
       for (var j = 0; j < gameOptions.boardSize.cols; j++) {
@@ -115,6 +122,17 @@ class playGame extends Phaser.Scene {
       window.location.href =
         "https://danielalbino.github.io/danielalbinoporfolio/";
     });
+
+    var textXY = this.getTilePosition(-0.92, -0.4);
+    this.scoreText = this.add.bitmapText(textXY.x, textXY.y, "font", "0");
+    textXY = this.getTilePosition(-0.92, 1.1);
+    this.bestScoreText = this.add.bitmapText(textXY.x, textXY.y, "font", "0");
+    this.bestScore = localStorage.getItem(gameOptions.localStorageName);
+    if (this.bestScore == null) {
+      this.bestScore = 0;
+    }
+
+    this.bestScore.toString();
   } //create
 
   addTile() {
@@ -244,6 +262,10 @@ class playGame extends Phaser.Scene {
             this.boardArray[curRow][curCol].tileValue = 0;
             if (willUpdate) {
               this.boardArray[newRow][newCol].tileValue++;
+              this.score += Math.pow(
+                2,
+                this.boardArray[newRow][newCol].tileValue
+              );
               this.boardArray[newRow][newCol].upgraded = true;
               // this.boardArray[curRow][curCol].tileSprite.setFrame(tileValue);
             } else {
@@ -304,6 +326,12 @@ class playGame extends Phaser.Scene {
   }
 
   refreshBoard() {
+    this.scoreText.text = this.score.toString();
+    if (this.score > this.bestScore) {
+      this.bestScore = this.score;
+      localStorage.setItem(gameOptions.localStorageName, this.bestScore);
+      this.bestScoreText.text = this.bestScore.toString();
+    }
     for (var i = 0; i < gameOptions.boardSize.rows; i++) {
       for (var j = 0; j < gameOptions.boardSize.cols; j++) {
         var spritePosition = this.getTilePosition(i, j);
@@ -326,6 +354,9 @@ class playGame extends Phaser.Scene {
     var rowInside = row >= 0 && row < gameOptions.boardSize.rows;
     var colInside = col >= 0 && col < gameOptions.boardSize.cols;
     if (!rowInside || !colInside) {
+      return false;
+    }
+    if (this.boardArray[row][col].tileValue == 12) {
       return false;
     }
     var emptySpot = this.boardArray[row][col].tileValue == 0;
