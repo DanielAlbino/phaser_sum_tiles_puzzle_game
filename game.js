@@ -48,11 +48,18 @@ class playGame extends Phaser.Scene {
   }
 
   create() {
+    this.boardArray = [];
     for (var i = 0; i < 4; i++) {
+      this.boardArray[i] = [];
       for (var j = 0; j < 4; j++) {
         var tilePosition = this.getTilePosition(i, j);
         this.add.image(tilePosition.x, tilePosition.y, "emptytile");
-        this.add.sprite(tilePosition.x, tilePosition.y, "tiles", 0);
+        var tile = this.add.sprite(tilePosition.x, tilePosition.y, "tiles", 0);
+        tile.visible = false;
+        this.boardArray[i][j] = {
+          tileValue: 0,
+          tielSprite: true,
+        };
       }
     }
   }
