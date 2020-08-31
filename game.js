@@ -55,7 +55,7 @@ class bootGame extends Phaser.Scene {
     this.load.image("restart", "Assets/restart.png");
     this.load.image("scorepanel", "Assets/score_panel.png");
     this.load.image("scorelabels", "Assets/score_labels.png");
-    this.load.image("logo", "Assets/logo.png");
+    this.load.image("logo", "Assets/Logo.png");
     this.load.image("howtoplay", "Assets/howtoplay.png");
     this.load.bitmapFont(
       "font",
