@@ -8,6 +8,11 @@ var gameOptions = {
   },
   tweenSpeed: 1000,
 };
+const LEFT = 0;
+const RIGHT = 1;
+const UP = 2;
+const DOWN = 3;
+
 window.onload = () => {
   var gameConfig = {
     width:
@@ -37,10 +42,10 @@ class bootGame extends Phaser.Scene {
       frameWidth: gameOptions.tileSize,
       frameHeight: gameOptions.tileSize,
     });
-  }
+  } //preload
   create() {
     this.scene.start("PlayGame");
-  }
+  } //create
 } //class
 
 class playGame extends Phaser.Scene {
@@ -51,6 +56,9 @@ class playGame extends Phaser.Scene {
   create() {
     this.canMove = false;
     this.boardArray = [];
+    this.input.keyboard.on("keydown", this.handleKey, this);
+    this.input.on("pointerup", this.handleSwipe, this);
+
     for (var i = 0; i < 4; i++) {
       this.boardArray[i] = [];
       for (var j = 0; j < 4; j++) {
@@ -66,6 +74,41 @@ class playGame extends Phaser.Scene {
     }
     this.addTile();
     this.addTile();
+  } //create
+
+  handleKey(e) {
+    if (this.canMove) {
+      switch (e.code) {
+        case "keyA":
+        case "ArrowLeft":
+          this.makeMove(LEFT);
+          break;
+        case "keyD":
+        case "ArrowRight":
+          this.makeMove(RIGHT);
+          break;
+        case "keyW":
+        case "ArrowUp":
+          this.makeMove(UP);
+          break;
+        case "KeyS":
+        case "ArrowDown":
+          this.makeMove(DOWN);
+          break;
+      }
+    }
+  }
+
+  makeMove(direction) {
+    console.log("About to Move " + direction);
+  }
+
+  handleSwipe(e) {
+    var swipeTime = e.upTime - e.downTime;
+    var swipe = new Phaser.Geom.Point(e.upX - e.downX - e.downY);
+    console.log("Movement Time:" + swipeTime + "ms");
+    console.log("Horiontal distance:" + swipe.x + "pixels");
+    console.log("Vertical distance:" + swipe.y + "pixels");
   }
 
   getTilePosition(row, col) {
